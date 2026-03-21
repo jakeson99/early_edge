@@ -2,6 +2,7 @@ import os
 from datetime import date
 from jinja2 import Environment, FileSystemLoader
 import db
+import perplexity_client
 import claude_client
 import email_client
 
@@ -80,10 +81,19 @@ def send_briefing(user: dict):
 
     print(f"[job] Generating briefing for {user['name']} ({user['email']})…")
 
+    # ── Step 1: Fetch live articles from Perplexity ────────────────────────
     try:
-        briefing = claude_client.generate_briefing(user, today)
+        raw_articles = perplexity_client.fetch_articles(user, today)
+        print(f"[job] Perplexity returned {len(raw_articles)} articles for {user['email']}")
     except Exception as e:
-        print(f"[job] Claude generation error for {user['email']}: {e}")
+        print(f"[job] Perplexity error for {user['email']}: {e}")
+        return
+
+    # ── Step 2: Personalise with Claude ────────────────────────────────────
+    try:
+        briefing = claude_client.personalise_briefing(user, raw_articles, today)
+    except Exception as e:
+        print(f"[job] Claude personalisation error for {user['email']}: {e}")
         return
 
     # ── Code-level content filters ─────────────────────────────────────────

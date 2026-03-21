@@ -8,6 +8,8 @@ services:
     envVars:
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: FROM_EMAIL
