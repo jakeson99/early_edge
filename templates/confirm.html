@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Early Edge — You're all set</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --clay: #CDACA1; --linen: #DFD8C5; --cream: #ECE4D7; --bg: #F4F0EA;
+    --ink: #3D3530; --ink-soft: #6B5E58; --ink-dim: #9A8E89;
+    --white: #FDFAF7; --mug: #E07060;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: 'Nunito', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+  .card { background: var(--white); border: 1.5px solid var(--linen); border-radius: 16px; padding: 56px 48px; max-width: 520px; width: 100%; text-align: center; }
+  .mug { display: flex; justify-content: center; margin-bottom: 28px; }
+  h1 { font-family: 'Playfair Display', serif; font-size: 36px; color: var(--ink); margin-bottom: 12px; }
+  h1 em { color: var(--clay); font-style: italic; }
+  p { font-size: 15px; color: var(--ink-soft); line-height: 1.65; }
+  .note { margin-top: 28px; font-size: 13px; color: var(--ink-dim); }
+  @keyframes steam1 { 0%,100%{transform:translateY(0) scaleX(1);opacity:.7} 50%{transform:translateY(-6px) scaleX(1.2);opacity:.3} }
+  @keyframes steam2 { 0%,100%{transform:translateY(0) scaleX(1);opacity:.5} 50%{transform:translateY(-8px) scaleX(.8);opacity:.2} }
+  .steam-1{animation:steam1 2.2s ease-in-out infinite;transform-origin:bottom center}
+  .steam-2{animation:steam2 2.6s ease-in-out infinite .4s;transform-origin:bottom center}
+  .steam-3{animation:steam1 2s ease-in-out infinite .8s;transform-origin:bottom center}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="mug">
+    <svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g class="steam-1"><path d="M44 18 C44 14 48 12 48 8" stroke="#CDACA1" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>
+      <g class="steam-2"><path d="M60 16 C60 11 64 9 64 4" stroke="#CDACA1" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>
+      <g class="steam-3"><path d="M76 18 C76 14 80 12 80 8" stroke="#CDACA1" stroke-width="2.5" stroke-linecap="round" fill="none"/></g>
+      <rect x="22" y="28" width="72" height="74" rx="10" fill="#E07060"/>
+      <rect x="22" y="28" width="72" height="10" rx="10" fill="#C85A4A"/>
+      <ellipse cx="58" cy="33" rx="32" ry="6" fill="#5C3A28"/>
+      <rect x="22" y="68" width="72" height="22" fill="#ECE4D7"/>
+      <g transform="translate(40,79)"><line x1="0" y1="-6" x2="0" y2="6" stroke="#E07060" stroke-width="1.8" stroke-linecap="round"/><line x1="-6" y1="0" x2="6" y2="0" stroke="#E07060" stroke-width="1.8" stroke-linecap="round"/><line x1="-4" y1="-4" x2="4" y2="4" stroke="#E07060" stroke-width="1.8" stroke-linecap="round"/><line x1="4" y1="-4" x2="-4" y2="4" stroke="#E07060" stroke-width="1.8" stroke-linecap="round"/></g>
+      <g transform="translate(66,79)"><line x1="0" y1="-6" x2="0" y2="6" stroke="#E07060" stroke-width="1.8" stroke-linecap="round"/><line x1="-6" y1="0" x2="6" y2="0" stroke="#E07060" stroke-width="1.8" stroke-linecap="round"/><line x1="-4" y1="-4" x2="4" y2="4" stroke="#E07060" stroke-width="1.8" stroke-linecap="round"/><line x1="4" y1="-4" x2="-4" y2="4" stroke="#E07060" stroke-width="1.8" stroke-linecap="round"/></g>
+      <path d="M94 50 C114 50 118 68 114 76 C110 84 94 84 94 84" stroke="#C85A4A" stroke-width="8" stroke-linecap="round" fill="none"/>
+      <path d="M94 50 C110 50 114 66 110 74 C107 80 94 84 94 84" stroke="#E07060" stroke-width="4" stroke-linecap="round" fill="none"/>
+    </svg>
+  </div>
+  <h1>You're all <em>set</em>.</h1>
+  <p>Your first Early Edge briefing will arrive tomorrow morning. ☕</p>
+  <p class="note">You can update your profile any time by revisiting this page.</p>
+</div>
+</body>
+</html>

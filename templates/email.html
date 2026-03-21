@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Early Edge — {{ date_str }}</title>
+<style>
+  body { margin: 0; padding: 0; background: #F4F0EA; font-family: Georgia, 'Times New Roman', serif; }
+  .wrapper { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
+  .card { background: #FDFAF7; border-radius: 14px; overflow: hidden; border: 1px solid #DFD8C5; }
+
+  /* Header */
+  .header { background: #CDACA1; padding: 22px 30px; }
+  .header-brand { font-size: 22px; color: #FDFAF7; font-style: italic; margin: 0 0 3px; font-family: Georgia, serif; }
+  .header-date { font-size: 11px; color: rgba(253,250,247,0.75); letter-spacing: 0.08em; text-transform: uppercase; font-family: Arial, sans-serif; }
+
+  /* Greeting */
+  .greeting { padding: 22px 30px 6px; font-size: 17px; color: #3D3530; line-height: 1.4; }
+
+  /* Section label */
+  .section-label { padding: 4px 30px 14px; font-size: 10px; color: #9A8E89; letter-spacing: 0.16em; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: bold; }
+
+  /* Items */
+  .item { padding: 16px 30px; border-top: 1px solid #ECE4D7; }
+  .item-num { font-size: 26px; color: #CDACA1; font-style: italic; line-height: 1; margin-bottom: 7px; font-family: Georgia, serif; opacity: 0.7; }
+  .item-category { display: inline-block; font-size: 10px; font-weight: bold; color: #89999A; background: #EDE8DF; padding: 2px 9px; border-radius: 100px; margin-bottom: 8px; font-family: Arial, sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+  .item-headline { font-size: 15px; font-weight: bold; color: #3D3530; margin-bottom: 8px; line-height: 1.45; }
+  .item-headline a { color: #3D3530; text-decoration: none; border-bottom: 1px solid #CDACA1; }
+  .item-summary { font-size: 13px; color: #6B5E58; line-height: 1.65; margin-bottom: 8px; font-family: Arial, sans-serif; }
+  .item-why { font-size: 12px; color: #89999A; line-height: 1.55; font-family: Arial, sans-serif; }
+  .item-why strong { color: #6B5E58; }
+  .item-source { display: inline-block; font-size: 11px; color: #CDACA1; font-family: Arial, sans-serif; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: bold; }
+
+  /* Divider */
+  .dashed-divider { border: none; border-top: 1.5px dashed #DFD8C5; margin: 0 30px; }
+
+  /* Prompts */
+  .prompts { padding: 20px 30px; background: #FAF6F2; }
+  .prompts-label { font-size: 10px; color: #9A8E89; letter-spacing: 0.16em; text-transform: uppercase; font-family: Arial, sans-serif; font-weight: bold; margin-bottom: 16px; }
+  .prompt-item { margin-bottom: 14px; display: flex; align-items: flex-start; gap: 8px; }
+  .prompt-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .prompt-text { font-size: 13px; color: #3D3530; line-height: 1.6; font-family: Arial, sans-serif; }
+  .prompt-text strong { color: #6B5E58; }
+
+  /* Footer */
+  .footer { padding: 18px 30px; text-align: center; font-size: 11px; color: #9A8E89; font-family: Arial, sans-serif; line-height: 1.8; border-top: 1px solid #EDE8DF; }
+  .footer a { color: #CDACA1; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-brand">Early Edge</div>
+      <div class="header-date">{{ date_str }}</div>
+    </div>
+
+    <!-- Greeting -->
+    <div class="greeting">Good morning, {{ user.name }}.</div>
+    <div class="section-label">Your Five — Today's Briefing</div>
+
+    <!-- Items -->
+    {% for item in briefing.items %}
+    <div class="item">
+      <div class="item-num">0{{ item.number }}</div>
+      <div><span class="item-category">{{ item.category }}</span></div>
+      <div class="item-headline">
+        {% if item.url %}
+          <a href="{{ item.url }}">{{ item.headline }}</a>
+        {% else %}
+          {{ item.headline }}
+        {% endif %}
+      </div>
+      <div class="item-summary">{{ item.summary }}</div>
+      <div class="item-why"><strong>Why it matters:</strong> {{ item.why_it_matters }}</div>
+      <div class="item-source">{{ item.source }}</div>
+    </div>
+    {% endfor %}
+
+    <!-- Think Deeper (conditional) -->
+    {% if briefing.prompts %}
+    <hr class="dashed-divider">
+    <div class="prompts">
+      <div class="prompts-label">Think Deeper</div>
+      <div class="prompt-item">
+        <span class="prompt-icon">🔥</span>
+        <span class="prompt-text"><strong>Debate:</strong> {{ briefing.prompts.debate }}</span>
+      </div>
+      <div class="prompt-item">
+        <span class="prompt-icon">🔗</span>
+        <span class="prompt-text"><strong>Synthesis:</strong> {{ briefing.prompts.synthesis }}</span>
+      </div>
+      <div class="prompt-item">
+        <span class="prompt-icon">🔮</span>
+        <span class="prompt-text"><strong>Predict:</strong> {{ briefing.prompts.prediction }}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="footer">
+      Early Edge · Your personal morning briefing<br>
+      <a href="#">Update my profile</a> &nbsp;·&nbsp; <a href="#">Unsubscribe</a>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
