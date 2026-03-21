@@ -12,10 +12,10 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-change-in-prod')
 
 DELIVERY_HOUR_MAP = {
-    "5:00 \u2013 6:00 AM": 5,
-    "6:00 \u2013 7:00 AM": 6,
-    "7:00 \u2013 8:00 AM": 7,
-    "Custom time": 7,
+    "5:00 AM": 5,
+    "6:00 AM": 6,
+    "7:00 AM": 7,
+    "8:00 AM": 8,
 }
 
 
@@ -90,7 +90,7 @@ def submit():
         'depth_score':      request.form.get('depth_score', 2),
         'prompts_freq':     request.form.get('prompts_freq', 'Yes, every day'),
         'exclusions':       request.form.get('exclusions', '').strip(),
-        'delivery_time':    request.form.get('delivery_time', '7:00 \u2013 8:00 AM'),
+        'delivery_time':    request.form.get('delivery_time', '7:00 AM'),
         'delivery_days':    request.form.get('delivery_days', 'Mon,Tue,Wed,Thu,Fri'),
         'timezone':         request.form.get('timezone', 'Europe/London'),
         'extra_notes':      request.form.get('extra_notes', '').strip(),
@@ -103,10 +103,23 @@ def submit():
         return jsonify({'error': 'Name and email are required.'}), 400
 
     try:
-        db.insert_user(data)
+        user_id = db.insert_user(data)
     except Exception as e:
         print(f"[submit] DB error: {e}")
         return jsonify({'error': 'Something went wrong saving your profile.'}), 500
+
+    # Send welcome email in background (don't block the response)
+    try:
+        saved_user = db.get_user_by_email(data['email'])
+        if saved_user:
+            import threading
+            threading.Thread(
+                target=email_job.send_welcome_email,
+                args=(saved_user,),
+                daemon=True
+            ).start()
+    except Exception as e:
+        print(f"[submit] Welcome email error: {e}")
 
     return jsonify({'status': 'ok', 'name': data['name']})
 

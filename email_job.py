@@ -10,6 +10,29 @@ _template_env = Environment(loader=FileSystemLoader('templates'))
 
 BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
 
+
+def send_welcome_email(user: dict):
+    """Sends a one-time welcome email immediately after signup."""
+    try:
+        template = _template_env.get_template('email_welcome.html')
+        html = template.render(
+            user=user,
+            profile_url=f"{BASE_URL}/profile",
+            unsubscribe_url=f"{BASE_URL}/unsubscribe?email={user['email']}",
+            delete_url=f"{BASE_URL}/delete",
+        )
+    except Exception as e:
+        print(f"[welcome] Template error for {user.get('email')}: {e}")
+        return
+
+    subject = f"Welcome to Early Edge, {user['name']} ☕"
+    success = email_client.send_email(user['email'], subject, html)
+
+    if success:
+        print(f"[welcome] ✓ Welcome email sent to {user['email']}")
+    else:
+        print(f"[welcome] ✗ Failed to send welcome email to {user['email']}")
+
 FINANCIAL_PHRASES = [
     "you should buy",
     "you should sell",

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to Early Edge</title>
+<style>
+  body { margin: 0; padding: 0; background: #F4F0EA; font-family: Georgia, 'Times New Roman', serif; }
+  .wrapper { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
+  .card { background: #FDFAF7; border-radius: 14px; overflow: hidden; border: 1px solid #DFD8C5; }
+
+  .header { background: #2C2420; padding: 36px 30px; text-align: center; }
+  .header-brand { font-size: 26px; color: #FDFAF7; font-style: italic; font-family: Georgia, serif; margin-bottom: 6px; }
+  .header-brand em { color: #CDACA1; }
+  .header-sub { font-size: 11px; color: rgba(253,250,247,0.4); letter-spacing: 0.12em; text-transform: uppercase; font-family: Arial, sans-serif; }
+
+  .mug-row { background: #2C2420; padding: 0 0 32px; display: flex; justify-content: center; }
+
+  .body { padding: 36px 30px 28px; }
+  .greeting { font-size: 22px; color: #2C2420; margin-bottom: 20px; line-height: 1.3; }
+  .greeting em { color: #CDACA1; font-style: italic; }
+
+  p { font-size: 14px; color: #6B5E58; line-height: 1.75; margin-bottom: 16px; font-family: Arial, sans-serif; }
+  p strong { color: #2C2420; }
+
+  .what-to-expect { background: #F4F0EA; border-radius: 10px; padding: 20px 24px; margin: 24px 0; }
+  .expect-label { font-size: 10px; font-weight: bold; color: #9A8E89; letter-spacing: 0.14em; text-transform: uppercase; font-family: Arial, sans-serif; margin-bottom: 14px; }
+  .expect-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; font-family: Arial, sans-serif; font-size: 13px; color: #6B5E58; line-height: 1.5; }
+  .expect-item:last-child { margin-bottom: 0; }
+  .expect-num { font-family: Georgia, serif; font-size: 18px; color: #CDACA1; font-style: italic; flex-shrink: 0; width: 20px; margin-top: -1px; opacity: 0.8; }
+
+  .cta-row { text-align: center; margin: 28px 0 20px; }
+  .cta-btn {
+    display: inline-block;
+    background: #CDACA1;
+    color: #FDFAF7;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 14px 32px;
+    border-radius: 100px;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+
+  .divider { border: none; border-top: 1.5px dashed #DFD8C5; margin: 24px 0; }
+
+  .goal-box { border-left: 3px solid #CDACA1; padding: 12px 16px; margin: 20px 0; }
+  .goal-label { font-size: 10px; font-weight: bold; color: #CDACA1; letter-spacing: 0.14em; text-transform: uppercase; font-family: Arial, sans-serif; margin-bottom: 6px; }
+  .goal-text { font-size: 14px; color: #3D3530; line-height: 1.6; font-family: Arial, sans-serif; font-style: italic; }
+
+  .footer { padding: 18px 30px; text-align: center; font-size: 11px; color: #9A8E89; font-family: Arial, sans-serif; line-height: 1.8; border-top: 1px solid #EDE8DF; }
+  .footer a { color: #CDACA1; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-brand">Early <em>Edge</em></div>
+      <div class="header-sub">Your morning briefing</div>
+    </div>
+
+    <!-- Body -->
+    <div class="body">
+      <div class="greeting">Welcome, <em>{{ user.name }}.</em></div>
+
+      <p>You're in. Your profile has been saved and your first personalised briefing will arrive <strong>tomorrow morning</strong> at your chosen time.</p>
+
+      {% if user.primary_goal %}
+      <p>We've noted your goal:</p>
+      <div class="goal-box">
+        <div class="goal-label">Your goal</div>
+        <div class="goal-text">{{ user.primary_goal }}</div>
+      </div>
+      <p>Every piece of content we send you will be chosen because it genuinely moves you closer to that. Not because it's trending, not because an algorithm flagged it — because it's relevant to <em>you</em>.</p>
+      {% else %}
+      <p>Every piece of content we send you will be chosen because it genuinely moves you closer to where you're trying to go — not because it's trending, not because an algorithm flagged it.</p>
+      {% endif %}
+
+      <hr class="divider">
+
+      <div class="what-to-expect">
+        <div class="expect-label">What to expect each morning</div>
+        <div class="expect-item">
+          <div class="expect-num">01</div>
+          <div>Five real, sourced articles — breaking news, market signals, analysis, technology, and context — all chosen for your goals</div>
+        </div>
+        <div class="expect-item">
+          <div class="expect-num">02</div>
+          <div>A personalised "why this matters for you" line on every item, referencing your specific goal</div>
+        </div>
+        <div class="expect-item">
+          <div class="expect-num">03</div>
+          <div>Critical thinking prompts to push you beyond reading — to debate, predict, and form your own view</div>
+        </div>
+      </div>
+
+      <p>Read it with your coffee. It takes about ten minutes. Then get on with your day — informed, focused, and ahead.</p>
+
+      <div class="cta-row">
+        <a href="{{ profile_url }}" class="cta-btn">Update my profile →</a>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      Early Edge · Your personal morning briefing<br>
+      <a href="{{ unsubscribe_url }}">Unsubscribe</a> &nbsp;·&nbsp; <a href="{{ delete_url }}">Delete my data</a>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

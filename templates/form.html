@@ -284,7 +284,7 @@
     <input type="hidden" name="regions"      id="h_regions">
     <input type="hidden" name="engage_style" id="h_engage_style">
     <input type="hidden" name="prompts_freq" id="h_prompts_freq" value="Yes, every day">
-    <input type="hidden" name="delivery_time" id="h_delivery_time" value="7:00 – 8:00 AM">
+    <input type="hidden" name="delivery_time" id="h_delivery_time" value="7:00 AM">
     <input type="hidden" name="delivery_days" id="h_delivery_days" value="Mon,Tue,Wed,Thu,Fri">
 
     <!-- ── Step 1 ── -->
@@ -587,10 +587,10 @@
       <div class="field-group">
         <label class="field-label">What time should your briefing arrive?</label>
         <div class="radio-cards">
-          <div class="radio-card" data-group="delivery_time"><div class="radio-card-title">5:00 – 6:00 AM</div><div class="radio-card-desc">Before the world is awake</div></div>
-          <div class="radio-card" data-group="delivery_time"><div class="radio-card-title">6:00 – 7:00 AM</div><div class="radio-card-desc">First thing, with your coffee</div></div>
-          <div class="radio-card selected" data-group="delivery_time"><div class="radio-card-title">7:00 – 8:00 AM</div><div class="radio-card-desc">Over breakfast or the commute</div></div>
-          <div class="radio-card" data-group="delivery_time"><div class="radio-card-title">Custom time</div><div class="radio-card-desc">I'll set my own</div></div>
+          <div class="radio-card" data-group="delivery_time"><div class="radio-card-title">5:00 AM</div><div class="radio-card-desc">Before the world is awake</div></div>
+          <div class="radio-card" data-group="delivery_time"><div class="radio-card-title">6:00 AM</div><div class="radio-card-desc">First thing, with your coffee</div></div>
+          <div class="radio-card selected" data-group="delivery_time"><div class="radio-card-title">7:00 AM</div><div class="radio-card-desc">Over breakfast or the commute</div></div>
+          <div class="radio-card" data-group="delivery_time"><div class="radio-card-title">8:00 AM</div><div class="radio-card-desc">Once you're settled at your desk</div></div>
         </div>
       </div>
 
@@ -671,14 +671,49 @@
             <div class="preview-brand">Early <em>Edge</em></div>
             <div class="preview-date" id="previewDate">Saturday, 22 March 2026</div>
           </div>
-          <div class="preview-item"><div class="preview-num">01</div><div class="preview-text">Europe's largest grid operator announces €40bn upgrade plan — what it means for energy leaders<div><span class="preview-tag">Energy · Strategy</span></div></div></div>
-          <div class="preview-item"><div class="preview-num">02</div><div class="preview-text">Saudi Aramco's new CEO signals a pivot toward petrochemicals — reading the Gulf's long game<div><span class="preview-tag">Middle East · Markets</span></div></div></div>
-          <div class="preview-item"><div class="preview-num">03</div><div class="preview-text">Why the next energy CEO will need to be a politician as much as an executive<div><span class="preview-tag">Leadership · Analysis</span></div></div></div>
-          <div class="preview-item"><div class="preview-num">04</div><div class="preview-text">Solid-state batteries hit commercial viability — what the timeline means for grid storage<div><span class="preview-tag">Technology · Innovation</span></div></div></div>
-          <div class="preview-item"><div class="preview-num">05</div><div class="preview-text">Nigeria's new energy minister and what her appointment signals for Africa's oil future<div><span class="preview-tag">Africa · Geopolitics</span></div></div></div>
+
+          <div style="font-size:10px;color:var(--ink-dim);letter-spacing:0.14em;text-transform:uppercase;font-weight:700;margin-bottom:14px;font-family:Arial,sans-serif;">Your Five — Today's Briefing</div>
+
+          <div class="preview-item">
+            <div class="preview-num">01</div>
+            <div class="preview-text">
+              <div style="margin-bottom:3px"><span class="preview-tag">Energy · Strategy</span></div>
+              Europe's largest grid operator announces €40bn upgrade plan
+              <div style="font-size:11px;color:var(--ink-dim);margin-top:5px;line-height:1.5">Europe's grid operator is accelerating infrastructure investment to handle the surge in renewable capacity coming online by 2030.</div>
+              <div style="font-size:11px;color:var(--steel);margin-top:5px;line-height:1.5;font-style:italic">Why it matters: Grid infrastructure is the bottleneck that will define which energy leaders succeed — this is directly relevant to your goal of becoming a CEO who can navigate the energy transition.</div>
+            </div>
+          </div>
+
+          <div class="preview-item">
+            <div class="preview-num">02</div>
+            <div class="preview-text">
+              <div style="margin-bottom:3px"><span class="preview-tag">Markets · Gulf</span></div>
+              Saudi Aramco's new CEO signals pivot toward petrochemicals
+              <div style="font-size:11px;color:var(--ink-dim);margin-top:5px;line-height:1.5">The appointment marks a strategic shift as Gulf producers diversify revenue ahead of peak oil demand.</div>
+              <div style="font-size:11px;color:var(--steel);margin-top:5px;line-height:1.5;font-style:italic">Why it matters: Understanding how major producers are repositioning is essential context for any energy executive thinking about the next decade.</div>
+            </div>
+          </div>
+
+          <div class="preview-item">
+            <div class="preview-num">03</div>
+            <div class="preview-text">
+              <div style="margin-bottom:3px"><span class="preview-tag">Leadership · Analysis</span></div>
+              Why the next energy CEO will need to be a politician
+              <div style="font-size:11px;color:var(--ink-dim);margin-top:5px;line-height:1.5">Senior leaders in energy now spend more time navigating regulation, public narrative, and political relationships than managing operations.</div>
+              <div style="font-size:11px;color:var(--steel);margin-top:5px;line-height:1.5;font-style:italic">Why it matters: This directly maps to the leadership profile you're building — the commercial and political navigation the piece describes is precisely the gap between senior director and CEO.</div>
+            </div>
+          </div>
+
+          <!-- Think Deeper prompts preview -->
+          <div style="background:var(--bg);border-radius:8px;padding:14px 16px;margin-top:16px;">
+            <div style="font-size:10px;color:var(--ink-dim);letter-spacing:0.14em;text-transform:uppercase;font-weight:700;margin-bottom:12px;font-family:Arial,sans-serif;">Think Deeper</div>
+            <div style="font-size:12px;color:var(--ink-soft);line-height:1.6;margin-bottom:8px;font-family:Arial,sans-serif;">🔥 <strong>Debate:</strong> You're presenting to your board on the grid upgrade. A non-exec challenges you: "Why should we invest in infrastructure we don't own?" How do you respond?</div>
+            <div style="font-size:12px;color:var(--ink-soft);line-height:1.6;margin-bottom:8px;font-family:Arial,sans-serif;">🔗 <strong>Synthesis:</strong> Items 1 and 3 together suggest that the energy CEO of the future must be technically literate and politically fluent. Which of those two is harder to develop — and which are you weaker on?</div>
+            <div style="font-size:12px;color:var(--ink-soft);line-height:1.6;font-family:Arial,sans-serif;">🔮 <strong>Predict:</strong> In 18 months, will the Gulf's petrochemical pivot look like foresight or desperation? Make your call and write one sentence defending it.</div>
+          </div>
         </div>
 
-        <p style="margin-top:24px;font-size:13px;color:var(--ink-dim)">First briefing arrives tomorrow morning. ☕</p>
+        <p style="margin-top:24px;font-size:13px;color:var(--ink-dim)">Your actual briefing will be personalised to your goal. First one arrives tomorrow morning. ☕</p>
       </div>
     </div>
 
