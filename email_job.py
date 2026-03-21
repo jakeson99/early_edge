@@ -1,3 +1,4 @@
+import os
 from datetime import date
 from jinja2 import Environment, FileSystemLoader
 import db
@@ -5,6 +6,68 @@ import claude_client
 import email_client
 
 _template_env = Environment(loader=FileSystemLoader('templates'))
+
+BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
+
+FINANCIAL_PHRASES = [
+    "you should buy",
+    "you should sell",
+    "i recommend investing",
+    "consider purchasing shares",
+    "buy this stock",
+    "sell this stock",
+    "i recommend buying",
+    "i recommend selling",
+]
+
+
+def check_content_filters(briefing: dict, user: dict) -> list:
+    """Returns list of flag strings. Empty list = all checks passed."""
+    flags = []
+    items = briefing.get('items', [])
+
+    # 1. Financial advice keyword filter
+    for item in items:
+        text = (item.get('summary', '') + ' ' + item.get('why_it_matters', '')).lower()
+        for phrase in FINANCIAL_PHRASES:
+            if phrase in text:
+                flags.append(
+                    f"Financial advice phrase in item {item.get('number', '?')}: '{phrase}'"
+                )
+
+    # 2. Source count — at least 4 distinct named publications
+    sources = {item.get('source', '').strip().lower() for item in items if item.get('source')}
+    if len(sources) < 4:
+        flags.append(f"Only {len(sources)} distinct source(s) cited — minimum is 4")
+
+    # 3. Length sanity check — summary must be 40–200 words
+    for item in items:
+        summary = item.get('summary', '')
+        word_count = len(summary.split())
+        if word_count < 40 or word_count > 200:
+            flags.append(
+                f"Item {item.get('number', '?')} summary is {word_count} words "
+                f"(must be 40–200)"
+            )
+
+    # 4. Personalisation check — goal must appear/be paraphrased in ≥3 of 5 why_it_matters
+    goal = (user.get('primary_goal') or '').lower()
+    if goal:
+        # Use significant words (>4 chars) to check for goal reference
+        goal_words = {w for w in goal.split() if len(w) > 4}
+        personalised_count = 0
+        for item in items:
+            why = item.get('why_it_matters', '').lower()
+            matches = sum(1 for w in goal_words if w in why)
+            if goal_words and matches >= max(2, len(goal_words) // 4):
+                personalised_count += 1
+        if personalised_count < 3:
+            flags.append(
+                f"Only {personalised_count}/5 'why it matters' lines reference the "
+                f"subscriber's goal — minimum is 3"
+            )
+
+    return flags
 
 
 def send_briefing(user: dict):
@@ -20,21 +83,46 @@ def send_briefing(user: dict):
     try:
         briefing = claude_client.generate_briefing(user, today)
     except Exception as e:
-        print(f"[job] Claude error for {user['email']}: {e}")
+        print(f"[job] Claude generation error for {user['email']}: {e}")
         return
 
+    # ── Code-level content filters ─────────────────────────────────────────
+    code_flags = check_content_filters(briefing, user)
+    if code_flags:
+        print(f"[job] Code filter flagged briefing for {user['email']}: {code_flags}")
+        db.log_flagged_briefing(user['id'], local_date, code_flags, briefing)
+        print(f"[job] Briefing held — not sent to {user['email']}")
+        return
+
+    # ── AI validation pass ─────────────────────────────────────────────────
+    try:
+        validation = claude_client.validate_briefing(briefing, user)
+    except Exception as e:
+        print(f"[job] Validation error for {user['email']}: {e} — holding briefing")
+        db.log_flagged_briefing(user['id'], local_date, [f"Validation call failed: {e}"], briefing)
+        return
+
+    if not validation.get('valid', True):
+        flags = validation.get('flags', [])
+        print(f"[job] Validation flagged briefing for {user['email']}: {flags}")
+        db.log_flagged_briefing(user['id'], local_date, flags, briefing)
+        print(f"[job] Briefing held — not sent to {user['email']}")
+        return
+
+    # ── Render and send ────────────────────────────────────────────────────
     try:
         template = _template_env.get_template('email.html')
         html = template.render(
             user=user,
             briefing=briefing,
             date_str=today.strftime('%A, %d %B %Y'),
+            unsubscribe_url=f"{BASE_URL}/unsubscribe?email={user['email']}",
         )
     except Exception as e:
         print(f"[job] Template error for {user['email']}: {e}")
         return
 
-    subject = f"Your Early Edge — {today.strftime('%a %d %b')}"
+    subject = f"Your Early Edge, {user['name']} — {today.strftime('%a %d %b')}"
     success = email_client.send_email(user['email'], subject, html)
 
     if success:

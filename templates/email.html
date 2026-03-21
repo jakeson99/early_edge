@@ -30,6 +30,7 @@
   .item-why { font-size: 12px; color: #89999A; line-height: 1.55; font-family: Arial, sans-serif; }
   .item-why strong { color: #6B5E58; }
   .item-source { display: inline-block; font-size: 11px; color: #CDACA1; font-family: Arial, sans-serif; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: bold; }
+  .item-commercial { display: block; font-size: 10px; color: #9A8E89; font-family: Arial, sans-serif; margin-top: 6px; font-style: italic; padding: 4px 8px; background: #F4F0EA; border-radius: 4px; }
 
   /* Divider */
   .dashed-divider { border: none; border-top: 1.5px dashed #DFD8C5; margin: 0 30px; }
@@ -76,6 +77,9 @@
       <div class="item-summary">{{ item.summary }}</div>
       <div class="item-why"><strong>Why it matters:</strong> {{ item.why_it_matters }}</div>
       <div class="item-source">{{ item.source }}</div>
+      {% if item.commercial %}
+      <span class="item-commercial">Supported content — Early Edge may earn a small commission or fee from this item.</span>
+      {% endif %}
     </div>
     {% endfor %}
 
@@ -102,7 +106,7 @@
     <!-- Footer -->
     <div class="footer">
       Early Edge · Your personal morning briefing<br>
-      <a href="#">Update my profile</a> &nbsp;·&nbsp; <a href="#">Unsubscribe</a>
+      <a href="{{ unsubscribe_url }}">Unsubscribe</a>
     </div>
 
   </div>

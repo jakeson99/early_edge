@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytz
 from flask import Flask, render_template, request, jsonify
@@ -11,12 +11,11 @@ import email_job
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-change-in-prod')
 
-# Map delivery time window labels → the hour they start (user's local time)
 DELIVERY_HOUR_MAP = {
     "5:00 \u2013 6:00 AM": 5,
     "6:00 \u2013 7:00 AM": 6,
     "7:00 \u2013 8:00 AM": 7,
-    "Custom time": 7,  # default until custom picker is built
+    "Custom time": 7,
 }
 
 
@@ -33,7 +32,7 @@ def hourly_check():
             tz = pytz.timezone(tz_name)
             now_local = now_utc.astimezone(tz)
             local_hour = now_local.hour
-            local_day = now_local.strftime('%a')   # "Mon", "Tue" …
+            local_day = now_local.strftime('%a')
             local_date = now_local.strftime('%Y-%m-%d')
 
             target_hour = DELIVERY_HOUR_MAP.get(user.get('delivery_time', ''), 7)
@@ -60,31 +59,38 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit():
+    consent = request.form.get('consent')
+    if not consent:
+        return jsonify({'error': 'You must agree to the Privacy Policy to sign up.'}), 400
+
     data = {
-        'name':            request.form.get('name', '').strip(),
-        'email':           request.form.get('email', '').strip().lower(),
-        'role':            request.form.get('role', '').strip(),
-        'industry':        request.form.get('industry', ''),
-        'career_stage':    request.form.get('career_stage', ''),
-        'primary_goal':    request.form.get('primary_goal', '').strip(),
-        'timeline':        request.form.get('timeline', ''),
-        'secondary_goals': request.form.get('secondary_goals', '').strip(),
-        'admired_orgs':    request.form.get('admired_orgs', '').strip(),
-        'domains':         request.form.get('domains', ''),
-        'knowledge_gaps':  request.form.get('knowledge_gaps', '').strip(),
-        'skills':          request.form.get('skills', ''),
-        'regions':         request.form.get('regions', ''),
-        'countries':       request.form.get('countries', '').strip(),
-        'intl_ties':       request.form.get('intl_ties', '').strip(),
-        'culture_score':   request.form.get('culture_score', 2),
-        'engage_style':    request.form.get('engage_style', ''),
-        'depth_score':     request.form.get('depth_score', 2),
-        'prompts_freq':    request.form.get('prompts_freq', 'Yes, every day'),
-        'exclusions':      request.form.get('exclusions', '').strip(),
-        'delivery_time':   request.form.get('delivery_time', '7:00 \u2013 8:00 AM'),
-        'delivery_days':   request.form.get('delivery_days', 'Mon,Tue,Wed,Thu,Fri'),
-        'timezone':        request.form.get('timezone', 'Europe/London'),
-        'extra_notes':     request.form.get('extra_notes', '').strip(),
+        'name':             request.form.get('name', '').strip(),
+        'email':            request.form.get('email', '').strip().lower(),
+        'role':             request.form.get('role', '').strip(),
+        'industry':         request.form.get('industry', ''),
+        'career_stage':     request.form.get('career_stage', ''),
+        'primary_goal':     request.form.get('primary_goal', '').strip(),
+        'timeline':         request.form.get('timeline', ''),
+        'secondary_goals':  request.form.get('secondary_goals', '').strip(),
+        'admired_orgs':     request.form.get('admired_orgs', '').strip(),
+        'domains':          request.form.get('domains', ''),
+        'knowledge_gaps':   request.form.get('knowledge_gaps', '').strip(),
+        'skills':           request.form.get('skills', ''),
+        'regions':          request.form.get('regions', ''),
+        'countries':        request.form.get('countries', '').strip(),
+        'intl_ties':        request.form.get('intl_ties', '').strip(),
+        'culture_score':    request.form.get('culture_score', 2),
+        'engage_style':     request.form.get('engage_style', ''),
+        'depth_score':      request.form.get('depth_score', 2),
+        'prompts_freq':     request.form.get('prompts_freq', 'Yes, every day'),
+        'exclusions':       request.form.get('exclusions', '').strip(),
+        'delivery_time':    request.form.get('delivery_time', '7:00 \u2013 8:00 AM'),
+        'delivery_days':    request.form.get('delivery_days', 'Mon,Tue,Wed,Thu,Fri'),
+        'timezone':         request.form.get('timezone', 'Europe/London'),
+        'extra_notes':      request.form.get('extra_notes', '').strip(),
+        'consent_timestamp': datetime.now(timezone.utc).isoformat(),
+        'consent_version':  '1.0',
+        'marketing_consent': bool(request.form.get('marketing_consent')),
     }
 
     if not data['name'] or not data['email']:
@@ -97,6 +103,32 @@ def submit():
         return jsonify({'error': 'Something went wrong saving your profile.'}), 500
 
     return jsonify({'status': 'ok', 'name': data['name']})
+
+
+@app.route('/unsubscribe')
+def unsubscribe():
+    email = request.args.get('email', '').strip().lower()
+    unsubscribed = False
+    if email:
+        user = db.get_user_by_email(email)
+        if user and user.get('active'):
+            db.deactivate_user(user['id'])
+            unsubscribed = True
+    return render_template('unsubscribe.html', email=email, unsubscribed=unsubscribed)
+
+
+@app.route('/delete', methods=['GET', 'POST'])
+def delete_data():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        deleted = False
+        if email:
+            user = db.get_user_by_email(email)
+            if user:
+                db.delete_user_data(user['id'])
+                deleted = True
+        return render_template('delete.html', confirmed=True, deleted=deleted, email=email)
+    return render_template('delete.html', confirmed=False)
 
 
 @app.route('/health')

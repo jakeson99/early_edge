@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Early Edge — Unsubscribe</title>
+<style>
+  body { margin: 0; padding: 0; background: #F4F0EA; font-family: 'Georgia', serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .card { background: #FDFAF7; border: 1px solid #DFD8C5; border-radius: 14px; padding: 48px 40px; max-width: 480px; width: 100%; text-align: center; }
+  .brand { font-size: 20px; color: #CDACA1; font-style: italic; margin-bottom: 24px; }
+  h1 { font-size: 24px; color: #3D3530; margin-bottom: 12px; }
+  p { font-size: 14px; color: #6B5E58; line-height: 1.7; margin-bottom: 24px; font-family: Arial, sans-serif; }
+  a { color: #CDACA1; font-size: 13px; font-family: Arial, sans-serif; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">Early Edge</div>
+  {% if unsubscribed %}
+    <h1>You've been unsubscribed.</h1>
+    <p>We've stopped your daily briefings immediately. We're sorry to see you go.<br><br>
+    If you'd like to delete your data entirely, <a href="/delete">request data deletion here</a>.</p>
+  {% else %}
+    <h1>Already unsubscribed.</h1>
+    <p>We couldn't find an active subscription for {{ email }}.</p>
+  {% endif %}
+  <a href="/">← Back to Early Edge</a>
+</div>
+</body>
+</html>

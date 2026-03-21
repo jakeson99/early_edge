@@ -12,5 +12,9 @@ services:
         sync: false
       - key: FROM_EMAIL
         sync: false
+      - key: REPLY_TO_EMAIL
+        sync: false
+      - key: BASE_URL
+        sync: false
       - key: SECRET_KEY
         sync: false

@@ -615,6 +615,26 @@
         <textarea name="extra_notes" placeholder="e.g. I travel a lot — occasionally I'd love a Sunday evening summary to prep for the week ahead." style="min-height:80px"></textarea>
       </div>
 
+      <hr class="form-divider">
+
+      <div class="field-group">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:14px">
+          <input type="checkbox" id="consent" name="consent" value="1" required
+            style="width:auto;margin-top:3px;flex-shrink:0;accent-color:var(--clay)">
+          <label for="consent" style="font-size:13px;color:var(--ink-soft);line-height:1.6;cursor:pointer">
+            I agree to the Early Edge Privacy Policy and consent to receiving my personalised daily briefing by email.
+            <span style="color:var(--mug-dark)">*</span>
+          </label>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <input type="checkbox" id="marketing_consent" name="marketing_consent" value="1"
+            style="width:auto;margin-top:3px;flex-shrink:0;accent-color:var(--clay)">
+          <label for="marketing_consent" style="font-size:13px;color:var(--ink-dim);line-height:1.6;cursor:pointer">
+            I am happy to hear about occasional partner offers.
+          </label>
+        </div>
+      </div>
+
       <div class="nav-row">
         <button type="button" class="btn-back" onclick="goTo(5)">← Back</button>
         <button type="button" class="btn-next" onclick="complete()">Set my Early Edge ☕</button>
@@ -694,8 +714,10 @@
     // Basic validation
     const email = document.querySelector('input[name="email"]').value.trim();
     const name  = document.querySelector('input[name="name"]').value.trim();
+    const consent = document.getElementById('consent');
     if (!name) { goTo(1); alert('Please enter your first name.'); return; }
     if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+    if (!consent.checked) { alert('Please agree to the Privacy Policy to continue.'); return; }
 
     // Show completion screen immediately
     document.getElementById('step-' + current)?.classList.remove('active');
