@@ -54,7 +54,13 @@ def hourly_check():
 
 @app.route('/')
 def index():
-    return render_template('form.html')
+    return render_template('index.html')
+
+
+@app.route('/profile')
+def profile():
+    email = request.args.get('email', '')
+    return render_template('form.html', prefill_email=email)
 
 
 @app.route('/submit', methods=['POST'])
