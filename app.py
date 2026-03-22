@@ -176,8 +176,7 @@ def admin_send_now():
             results['skipped'] += 1
             results['emails'].append({'email': user['email'], 'status': 'skipped (already sent today)'})
         else:
-            t = threading.Thread(target=email_job.send_briefing, args=(user,))
-            t.daemon = False
+            t = threading.Thread(target=email_job.send_briefing, args=(user,), daemon=True)
             t.start()
             results['queued'] += 1
             results['emails'].append({'email': user['email'], 'status': 'queued'})
