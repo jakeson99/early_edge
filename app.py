@@ -155,6 +155,34 @@ def health():
     return jsonify({'status': 'ok'})
 
 
+@app.route('/admin/send-now', methods=['POST'])
+def admin_send_now():
+    """Manually trigger briefing emails to all active subscribers."""
+    token = request.headers.get('X-Admin-Token') or request.args.get('token')
+    secret = os.environ.get('SECRET_KEY', '')
+    if not token or token != secret:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    users = db.get_active_users()
+    results = {'queued': 0, 'skipped': 0, 'emails': []}
+
+    import threading
+    from datetime import date
+    local_date = date.today().isoformat()
+
+    for user in users:
+        if db.has_sent_today(user['id'], local_date):
+            results['skipped'] += 1
+            results['emails'].append({'email': user['email'], 'status': 'skipped (already sent today)'})
+        else:
+            threading.Thread(target=email_job.send_briefing, args=(user,), daemon=True).start()
+            results['queued'] += 1
+            results['emails'].append({'email': user['email'], 'status': 'queued'})
+
+    print(f"[admin] Manual send triggered — {results['queued']} queued, {results['skipped']} skipped")
+    return jsonify(results)
+
+
 # ── Boot ──────────────────────────────────────────────────────────────────────
 
 db.create_tables()
