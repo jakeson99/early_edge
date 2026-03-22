@@ -104,12 +104,21 @@ def send_briefing(user: dict):
 
     print(f"[job] Generating briefing for {user['name']} ({user['email']})…")
 
-    # ── Step 1: Fetch live articles from Perplexity ────────────────────────
-    try:
-        raw_articles = perplexity_client.fetch_articles(user, today)
-        print(f"[job] Perplexity returned {len(raw_articles)} articles for {user['email']}")
-    except Exception as e:
-        print(f"[job] Perplexity error for {user['email']}: {e}")
+    # ── Step 1: Fetch live articles from Perplexity (up to 2 attempts) ────────────────────────
+    import time
+    raw_articles = None
+    for attempt in range(1, 3):
+        try:
+            raw_articles = perplexity_client.fetch_articles(user, today)
+            print(f"[job] Perplexity returned {len(raw_articles)} articles for {user['email']}")
+            break
+        except Exception as e:
+            print(f"[job] Attempt {attempt}: Perplexity error for {user['email']}: {e}")
+            if attempt < 2:
+                time.sleep(10)
+
+    if not raw_articles:
+        print(f"[job] Perplexity failed after 2 attempts for {user['email']} — aborting")
         return
 
     # ── Step 2: Personalise with Claude (up to 2 attempts) ────────────────────────────────────
