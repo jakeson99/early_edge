@@ -295,13 +295,13 @@
 
       <div class="field-group">
         <label class="field-label">Your first name</label>
-        <input type="text" name="name" placeholder="e.g. Sarah" />
+        <input type="text" name="name" placeholder="e.g. Sarah" value="{{ user.name or '' if user else '' }}" />
       </div>
 
       <div class="field-group">
         <label class="field-label">Your current role or occupation</label>
         <div class="field-hint">Be specific — this calibrates the level and angle of your content.</div>
-        <input type="text" name="role" placeholder="e.g. Senior Strategy Manager at BP, or Co-founder of an early-stage startup" />
+        <input type="text" name="role" placeholder="e.g. Senior Strategy Manager at BP, or Co-founder of an early-stage startup" value="{{ user.role or '' if user else '' }}" />
       </div>
 
       <div class="field-group">
@@ -345,7 +345,7 @@
       <div class="field-group">
         <label class="field-label">What is your primary long-term career goal?</label>
         <div class="field-hint">Write it as if you're telling a mentor. Don't be modest.</div>
-        <textarea name="primary_goal" placeholder="e.g. I want to become the CEO of a major energy company within 10 years. I'm particularly interested in the transition to renewables and want to be seen as a leader who can navigate that shift commercially and politically."></textarea>
+        <textarea name="primary_goal" placeholder="e.g. I want to become the CEO of a major energy company within 10 years. I'm particularly interested in the transition to renewables and want to be seen as a leader who can navigate that shift commercially and politically.">{{ user.primary_goal or '' if user else '' }}</textarea>
       </div>
 
       <div class="field-group">
@@ -363,13 +363,13 @@
       <div class="field-group">
         <label class="field-label">Any secondary goals? <span style="color:var(--ink-dim);font-weight:400">(optional)</span></label>
         <div class="field-hint">Side business, public profile, industry pivot, writing a book…</div>
-        <textarea name="secondary_goals" placeholder="e.g. I also want to build enough of a personal brand that I could advise or join boards in the future." style="min-height:80px"></textarea>
+        <textarea name="secondary_goals" placeholder="e.g. I also want to build enough of a personal brand that I could advise or join boards in the future." style="min-height:80px">{{ user.secondary_goals or '' if user else '' }}</textarea>
       </div>
 
       <div class="field-group">
         <label class="field-label">Companies, leaders, or organisations you admire?</label>
         <div class="field-hint">We'll track relevant news about them and what they're doing.</div>
-        <input type="text" name="admired_orgs" placeholder="e.g. Ørsted, Octopus Energy, Hannah Jones, Fatih Birol" />
+        <input type="text" name="admired_orgs" placeholder="e.g. Ørsted, Octopus Energy, Hannah Jones, Fatih Birol" value="{{ user.admired_orgs or '' if user else '' }}" />
       </div>
 
       <div class="nav-row">
@@ -411,7 +411,7 @@
       <div class="field-group">
         <label class="field-label">What's a gap you know you have?</label>
         <div class="field-hint">The thing you keep meaning to get smarter on but never do.</div>
-        <textarea name="knowledge_gaps" placeholder="e.g. I understand the commercial side of energy but I'm weak on grid infrastructure and storage tech. I want to close that gap." style="min-height:80px"></textarea>
+        <textarea name="knowledge_gaps" placeholder="e.g. I understand the commercial side of energy but I'm weak on grid infrastructure and storage tech. I want to close that gap." style="min-height:80px">{{ user.knowledge_gaps or '' if user else '' }}</textarea>
       </div>
 
       <div class="field-group">
@@ -465,21 +465,21 @@
       <div class="field-group">
         <label class="field-label">Any specific countries to go deep on?</label>
         <div class="field-hint">Beyond headlines — business culture, political dynamics, social trends.</div>
-        <input type="text" name="countries" placeholder="e.g. Saudi Arabia, Germany, Nigeria, India" />
+        <input type="text" name="countries" placeholder="e.g. Saudi Arabia, Germany, Nigeria, India" value="{{ user.countries or '' if user else '' }}" />
       </div>
 
       <div class="field-group">
         <label class="field-label">International ties or context we should know about?</label>
-        <textarea name="intl_ties" placeholder="e.g. I work with Gulf partners and travel to Riyadh regularly. I also have personal connections to Nigeria and want to stay genuinely informed." style="min-height:80px"></textarea>
+        <textarea name="intl_ties" placeholder="e.g. I work with Gulf partners and travel to Riyadh regularly. I also have personal connections to Nigeria and want to stay genuinely informed." style="min-height:80px">{{ user.intl_ties or '' if user else '' }}</textarea>
       </div>
 
       <div class="field-group">
         <label class="field-label">How much cultural content — arts, society, trends?</label>
         <div class="slider-wrap">
-          <input type="range" min="1" max="5" value="2" id="cultureSlider" name="culture_score" oninput="updateSlider('cultureSlider','cultureVal')" />
+          <input type="range" min="1" max="5" value="{{ user.culture_score or 2 if user else 2 }}" id="cultureSlider" name="culture_score" oninput="updateSlider('cultureSlider','cultureVal')" />
           <div class="slider-labels">
             <span>Keep it professional</span>
-            <span>Culture shapes everything <span class="slider-value" id="cultureVal">2</span></span>
+            <span>Culture shapes everything <span class="slider-value" id="cultureVal">{{ user.culture_score or 2 if user else 2 }}</span></span>
           </div>
         </div>
       </div>
@@ -511,10 +511,10 @@
       <div class="field-group">
         <label class="field-label">How much depth per item?</label>
         <div class="slider-wrap">
-          <input type="range" min="1" max="4" value="2" id="depthSlider" name="depth_score" oninput="updateSlider('depthSlider','depthVal')" />
+          <input type="range" min="1" max="4" value="{{ user.depth_score or 2 if user else 2 }}" id="depthSlider" name="depth_score" oninput="updateSlider('depthSlider','depthVal')" />
           <div class="slider-labels">
             <span>One line + link</span>
-            <span>Full briefing paragraph <span class="slider-value" id="depthVal">2</span></span>
+            <span>Full briefing paragraph <span class="slider-value" id="depthVal">{{ user.depth_score or 2 if user else 2 }}</span></span>
           </div>
         </div>
       </div>
@@ -532,7 +532,7 @@
       <div class="field-group">
         <label class="field-label">What do you want to <em style="color:var(--mug-dark)">exclude</em>?</label>
         <div class="field-hint">Topics, viewpoints, or noise you never want cluttering your mornings.</div>
-        <textarea name="exclusions" placeholder="e.g. No crypto speculation, no culture war politics, no celebrity news. Keep it analytical." style="min-height:80px"></textarea>
+        <textarea name="exclusions" placeholder="e.g. No crypto speculation, no culture war politics, no celebrity news. Keep it analytical." style="min-height:80px">{{ user.exclusions or '' if user else '' }}</textarea>
       </div>
 
       <div class="nav-row">
@@ -549,7 +549,7 @@
 
       <div class="field-group">
         <label class="field-label">Your email address</label>
-        <input type="email" name="email" placeholder="you@email.com" value="{{ prefill_email or '' }}" />
+        <input type="email" name="email" placeholder="you@email.com" value="{{ user.email if user else prefill_email or '' }}" />
       </div>
 
       <div class="field-group">
@@ -612,7 +612,7 @@
       <div class="field-group">
         <label class="field-label">Anything else we should know?</label>
         <div class="field-hint">Context, nuance, or requests that didn't fit above.</div>
-        <textarea name="extra_notes" placeholder="e.g. I travel a lot — occasionally I'd love a Sunday evening summary to prep for the week ahead." style="min-height:80px"></textarea>
+        <textarea name="extra_notes" placeholder="e.g. I travel a lot — occasionally I'd love a Sunday evening summary to prep for the week ahead." style="min-height:80px">{{ user.extra_notes or '' if user else '' }}</textarea>
       </div>
 
       <hr class="form-divider">
@@ -637,7 +637,7 @@
 
       <div class="nav-row">
         <button type="button" class="btn-back" onclick="goTo(5)">← Back</button>
-        <button type="button" class="btn-next" onclick="complete()">Set my Early Edge ☕</button>
+        <button type="button" class="btn-next" onclick="complete()">{{ 'Update my Early Edge ☕' if user else 'Set my Early Edge ☕' }}</button>
       </div>
     </div>
 
@@ -840,19 +840,66 @@
   // ── Timezone auto-detect ──────────────────────────────────────────────────
 
   (function detectTimezone() {
+    {% if user and user.timezone %}
+    const saved = {{ user.timezone|tojson }};
+    const sel = document.getElementById('timezoneSelect');
+    if (!sel) return;
+    for (const opt of sel.options) {
+      if (opt.value === saved) { opt.selected = true; return; }
+    }
+    const opt = new Option(saved, saved, true, true);
+    sel.insertBefore(opt, sel.firstChild);
+    {% else %}
     const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const sel = document.getElementById('timezoneSelect');
     if (!sel || !detected) return;
-
-    // Try exact match first
     for (const opt of sel.options) {
       if (opt.value === detected) { opt.selected = true; return; }
     }
-
-    // No exact match — insert the detected zone at the top so the user can see it
     const opt = new Option(`${detected} (detected)`, detected, true, true);
     sel.insertBefore(opt, sel.firstChild);
+    {% endif %}
   })();
+
+  // ── Pre-fill pills & radio cards from saved profile ───────────────────────
+
+  {% if user %}
+  (function prefillSelections() {
+    const prefill = {
+      industry:      {{ (user.industry or '')|tojson }},
+      career_stage:  {{ (user.career_stage or '')|tojson }},
+      timeline:      {{ (user.timeline or '')|tojson }},
+      domains:       {{ (user.domains or '')|tojson }},
+      skills:        {{ (user.skills or '')|tojson }},
+      regions:       {{ (user.regions or '')|tojson }},
+      engage_style:  {{ (user.engage_style or '')|tojson }},
+      prompts_freq:  {{ (user.prompts_freq or '')|tojson }},
+      delivery_time: {{ (user.delivery_time or '')|tojson }},
+      delivery_days: {{ (user.delivery_days or '')|tojson }},
+    };
+
+    Object.entries(prefill).forEach(([group, value]) => {
+      if (!value) return;
+      const values = value.split(',').map(v => v.trim());
+
+      // Clear defaults, then apply saved selections
+      document.querySelectorAll(`.pill[data-group="${group}"], .radio-card[data-group="${group}"]`)
+        .forEach(el => el.classList.remove('selected'));
+
+      document.querySelectorAll(`.pill[data-group="${group}"]`).forEach(p => {
+        if (values.includes(p.textContent.trim())) p.classList.add('selected');
+      });
+      document.querySelectorAll(`.radio-card[data-group="${group}"]`).forEach(c => {
+        if (values.includes(c.querySelector('.radio-card-title').textContent.trim()))
+          c.classList.add('selected');
+      });
+
+      // Sync hidden inputs
+      const h = document.getElementById('h_' + group);
+      if (h) h.value = value;
+    });
+  })();
+  {% endif %}
 </script>
 </body>
 </html>

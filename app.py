@@ -60,7 +60,8 @@ def index():
 @app.route('/profile')
 def profile():
     email = request.args.get('email', '')
-    return render_template('form.html', prefill_email=email)
+    user = db.get_user_by_email(email) if email else None
+    return render_template('form.html', prefill_email=email, user=user)
 
 
 @app.route('/submit', methods=['POST'])
