@@ -44,7 +44,8 @@
     <h1>Delete my data</h1>
     <p>Enter your email address and we'll permanently delete all personal data we hold about you.</p>
     <form method="POST" action="/delete">
-      <input type="email" name="email" placeholder="your@email.com" required>
+      <input type="hidden" name="token" value="{{ token or '' }}">
+      <input type="email" name="email" value="{{ email or '' }}" placeholder="your@email.com" required>
       <button type="submit">Delete my data</button>
     </form>
     <p class="note">This will immediately stop your briefings and permanently remove your name, email, goal, and all preferences. This action cannot be undone.</p>

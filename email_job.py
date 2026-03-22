@@ -20,7 +20,7 @@ def send_welcome_email(user: dict):
             user=user,
             profile_url=auth.signed_url(BASE_URL, user['email'], '/profile'),
             unsubscribe_url=auth.signed_url(BASE_URL, user['email'], '/unsubscribe'),
-            delete_url=f"{BASE_URL}/delete",
+            delete_url=auth.signed_url(BASE_URL, user['email'], '/delete'),
         )
     except Exception as e:
         print(f"[welcome] Template error for {user.get('email')}: {e}")

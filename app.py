@@ -1,3 +1,4 @@
+import hmac
 import os
 from datetime import datetime, timezone
 
@@ -148,14 +149,17 @@ def unsubscribe():
 def delete_data():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
+        token = request.form.get('token', '')
         deleted = False
-        if email:
+        if email and auth.verify(email, token):
             user = db.get_user_by_email(email)
             if user:
                 db.delete_user_data(user['id'])
                 deleted = True
         return render_template('delete.html', confirmed=True, deleted=deleted, email=email)
-    return render_template('delete.html', confirmed=False)
+    email = request.args.get('email', '')
+    token = request.args.get('token', '')
+    return render_template('delete.html', confirmed=False, email=email, token=token)
 
 
 @app.route('/health')
@@ -168,7 +172,7 @@ def admin_send_now():
     """Manually trigger briefing emails to all active subscribers."""
     token = request.headers.get('X-Admin-Token')
     secret = os.environ.get('SECRET_KEY', '')
-    if not token or token != secret:
+    if not token or not hmac.compare_digest(token, secret):
         return jsonify({'error': 'Unauthorized'}), 401
 
     users = db.get_active_users()
