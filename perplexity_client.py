@@ -50,6 +50,7 @@ def fetch_articles(user: dict, today: date) -> list[dict]:
     Raises on API error or if fewer than 3 items are returned.
     """
     query = _build_query(user, today)
+    print(f'[perplexity] Query for {user.get("email")}: {query[:300]}')
 
     response = requests.post(
         PERPLEXITY_URL,
@@ -107,6 +108,7 @@ def fetch_articles(user: dict, today: date) -> list[dict]:
         raise RuntimeError(f'Perplexity response was not valid JSON: {clean[:300]}') from e
 
     if not isinstance(items, list) or len(items) < 3:
+        print(f'[perplexity] Raw response: {clean[:500]}')
         raise RuntimeError(f'Perplexity returned fewer than 3 items ({len(items) if isinstance(items, list) else 0})')
 
     return items[:5]
