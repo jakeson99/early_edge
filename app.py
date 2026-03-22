@@ -45,6 +45,8 @@ def hourly_check():
             if local_hour == target_hour and local_day in delivery_days:
                 if not db.has_sent_today(user['id'], local_date):
                     email_job.send_briefing(user)
+                    import time
+                    time.sleep(15)
 
         except Exception as e:
             print(f"[scheduler] Error for {user.get('email')}: {e}")
@@ -176,12 +178,21 @@ def admin_send_now():
             results['skipped'] += 1
             results['emails'].append({'email': user['email'], 'status': 'skipped (already sent today)'})
         else:
-            t = threading.Thread(target=email_job.send_briefing, args=(user,), daemon=True)
-            t.start()
             results['queued'] += 1
             results['emails'].append({'email': user['email'], 'status': 'queued'})
 
     print(f"[admin] Manual send triggered — {results['queued']} queued, {results['skipped']} skipped")
+
+    # Process sequentially in background thread so HTTP response returns immediately
+    users_to_send = [u for u in users if not db.has_sent_today(u['id'], local_date)]
+    def run_sequential():
+        import time
+        for user in users_to_send:
+            email_job.send_briefing(user)
+            if len(users_to_send) > 1:
+                time.sleep(15)
+    threading.Thread(target=run_sequential, daemon=True).start()
+
     return jsonify(results)
 
 
