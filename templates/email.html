@@ -63,7 +63,7 @@
     <div class="section-label">Your Five — Today's Briefing</div>
 
     <!-- Items -->
-    {% for item in briefing.items %}
+    {% for item in briefing['items'] %}
     <div class="item">
       <div class="item-num">0{{ item.number }}</div>
       <div><span class="item-category">{{ item.category }}</span></div>
