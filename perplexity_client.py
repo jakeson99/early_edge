@@ -19,7 +19,7 @@ def _build_query(user: dict, today: date) -> str:
     exclusions = user.get('exclusions') or ''
 
     parts = [
-        f"Today is {today_str}. Find exactly 5 real, distinct articles or news items published in the last 48 hours.",
+        f"Today is {today_str}. Find exactly 5 real, distinct articles or news items published in the last 7 days.",
         f"They must be genuinely relevant to a professional whose primary goal is: \"{goal}\".",
         f"Focus on these knowledge domains: {domains}.",
         f"Prioritise content from or relevant to: {regions}.",
