@@ -162,6 +162,34 @@ Return a single JSON object:
     return result
 
 
+def refine_perplexity_query(original_query: str, flags: list) -> str:
+    """Given a Perplexity query and combined quality flags, return an improved query."""
+    prompt = f"""You are improving a news search query for a personalised briefing service.
+
+The following query was used but the resulting briefing failed quality checks:
+
+ORIGINAL QUERY:
+{original_query}
+
+QUALITY ISSUES TO FIX:
+{chr(10).join(f'- {f}' for f in flags)}
+
+Rewrite the query to fix these issues:
+- If sources lack diversity: explicitly request articles from at least 5 different named publications
+- If personalisation is weak: make the subscriber's goal more prominent so articles directly relate to it
+- If factual accuracy is a concern: request well-sourced, established publications only
+- If content is generic: add more specificity tied to the subscriber's goal and domains
+
+Return ONLY the improved query text, no explanation or preamble."""
+
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=600,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.content[0].text.strip()
+
+
 def validate_briefing(briefing: dict, user: dict) -> dict:
     """Second-pass validation. Returns {"valid": bool, "flags": [str]}."""
     content_str = json.dumps(briefing, indent=2)

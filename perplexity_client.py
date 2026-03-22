@@ -43,13 +43,13 @@ def _build_query(user: dict, today: date) -> str:
     return ' '.join(parts)
 
 
-def fetch_articles(user: dict, today: date) -> list[dict]:
+def fetch_articles(user: dict, today: date, query_override: str = None) -> list[dict]:
     """
     Calls Perplexity to retrieve 5 real, sourced articles relevant to the user's profile.
     Returns a list of raw article dicts.
     Raises on API error or if fewer than 3 items are returned.
     """
-    query = _build_query(user, today)
+    query = query_override or _build_query(user, today)
     print(f'[perplexity] Query for {user.get("email")}: {query[:300]}')
 
     response = requests.post(

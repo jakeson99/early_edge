@@ -107,30 +107,33 @@ def send_briefing(user: dict):
     # ── Steps 1+2: Fetch + Personalise with up to 5 quality-check retries ───
     import time
     briefing = None
-    code_flags = []
+    all_flags = []
     raw_articles = None
+    refined_query = None
 
     for attempt in range(1, 6):
-        # Re-fetch from Perplexity if we have no articles or source diversity failed
-        need_new_articles = raw_articles is None or any(
-            'source' in f.lower() for f in code_flags
-        )
-        if need_new_articles:
+        # On retry, ask Claude to refine the Perplexity query based on all accumulated flags
+        if attempt > 1 and all_flags:
             try:
-                raw_articles = perplexity_client.fetch_articles(user, today)
-                print(f"[job] Attempt {attempt}: Perplexity returned {len(raw_articles)} articles for {user['email']}")
+                original_query = perplexity_client._build_query(user, today)
+                refined_query = claude_client.refine_perplexity_query(original_query, all_flags)
+                print(f"[job] Attempt {attempt}: refined Perplexity query for {user['email']}")
             except Exception as e:
-                print(f"[job] Attempt {attempt}: Perplexity error for {user['email']}: {e}")
-                if attempt < 5:
-                    time.sleep(10)
-                continue
+                print(f"[job] Attempt {attempt}: query refinement error for {user['email']}: {e}")
 
-        # Personalise with Claude, passing flags from previous attempt if any
+        # Fetch from Perplexity (always re-fetch on retry with refined query)
         try:
-            briefing = claude_client.personalise_briefing(
-                user, raw_articles, today,
-                fix_flags=code_flags if code_flags else None
-            )
+            raw_articles = perplexity_client.fetch_articles(user, today, query_override=refined_query)
+            print(f"[job] Attempt {attempt}: Perplexity returned {len(raw_articles)} articles for {user['email']}")
+        except Exception as e:
+            print(f"[job] Attempt {attempt}: Perplexity error for {user['email']}: {e}")
+            if attempt < 5:
+                time.sleep(10)
+            continue
+
+        # Personalise with Claude
+        try:
+            briefing = claude_client.personalise_briefing(user, raw_articles, today)
             if not isinstance(briefing, dict) or 'items' not in briefing:
                 print(f"[job] Attempt {attempt}: unexpected briefing structure for {user['email']} — retrying")
                 briefing = None
@@ -140,20 +143,32 @@ def send_briefing(user: dict):
             briefing = None
             continue
 
-        # Check quality filters
+        # Code-level filters
         code_flags = check_content_filters(briefing, user)
-        if not code_flags:
+
+        # AI validation
+        ai_flags = []
+        try:
+            validation = claude_client.validate_briefing(briefing, user)
+            if not validation.get('valid', True):
+                ai_flags = validation.get('flags', [])
+        except Exception as e:
+            print(f"[job] Attempt {attempt}: AI validation error for {user['email']}: {e}")
+
+        all_flags = code_flags + ai_flags
+
+        if not all_flags:
             print(f"[job] Attempt {attempt}: briefing passed all checks for {user['email']}")
             break
 
-        print(f"[job] Attempt {attempt}: flags for {user['email']}: {code_flags} — retrying with fixes")
+        print(f"[job] Attempt {attempt}: {len(all_flags)} flag(s) for {user['email']} — refining query and retrying")
         if attempt < 5:
             time.sleep(5)
 
-    if not briefing or code_flags:
+    if not briefing or all_flags:
         print(f"[job] Failed to produce clean briefing for {user['email']} after 5 attempts — aborting")
         if briefing:
-            db.log_flagged_briefing(user['id'], local_date, code_flags, briefing)
+            db.log_flagged_briefing(user['id'], local_date, all_flags, briefing)
         return
 
     # ── Render and send ────────────────────────────────────────────────────
