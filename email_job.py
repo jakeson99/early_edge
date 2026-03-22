@@ -127,21 +127,6 @@ def send_briefing(user: dict):
         print(f"[job] Briefing held — not sent to {user['email']}")
         return
 
-    # ── AI validation pass ─────────────────────────────────────────────────
-    try:
-        validation = claude_client.validate_briefing(briefing, user)
-    except Exception as e:
-        print(f"[job] Validation error for {user['email']}: {e} — holding briefing")
-        db.log_flagged_briefing(user['id'], local_date, [f"Validation call failed: {e}"], briefing)
-        return
-
-    if not validation.get('valid', True):
-        flags = validation.get('flags', [])
-        print(f"[job] Validation flagged briefing for {user['email']}: {flags}")
-        db.log_flagged_briefing(user['id'], local_date, flags, briefing)
-        print(f"[job] Briefing held — not sent to {user['email']}")
-        return
-
     # ── Render and send ────────────────────────────────────────────────────
     try:
         template = _template_env.get_template('email.html')
