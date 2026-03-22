@@ -186,7 +186,7 @@ Rewrite the query to fix these issues. IMPORTANT rules:
 Return ONLY the improved query text, no explanation or preamble."""
 
     response = client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-haiku-4-5-20251001",
         max_tokens=600,
         messages=[{"role": "user", "content": prompt}],
     )
@@ -263,7 +263,7 @@ If issues found:
 {{"valid": false, "flags": ["description of issue"]}}"""
 
     response = client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-haiku-4-5-20251001",
         max_tokens=1024,
         messages=[{"role": "user", "content": validation_prompt}],
     )
