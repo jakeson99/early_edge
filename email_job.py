@@ -104,77 +104,71 @@ def send_briefing(user: dict):
 
     print(f"[job] Generating briefing for {user['name']} ({user['email']})…")
 
-    # ── Steps 1+2: Fetch + Personalise with up to 5 quality-check retries ───
+    # ── Steps 1+2: Fetch + Personalise with up to 3 retries ─────────────────
     import time
     briefing = None
-    all_flags = []
+    code_flags = []
     raw_articles = None
     refined_query = None
 
-    for attempt in range(1, 6):
-        # On retry, ask Claude to refine the Perplexity query based on all accumulated flags
-        if attempt > 1 and all_flags:
+    for attempt in range(1, 4):
+        # On retry, use Haiku to refine the Perplexity query based on code filter flags
+        if attempt > 1 and code_flags:
             try:
                 original_query = perplexity_client._build_query(user, today)
-                refined_query = claude_client.refine_perplexity_query(original_query, all_flags)
+                refined_query = claude_client.refine_perplexity_query(original_query, code_flags)
                 print(f"[job] Attempt {attempt}: refined Perplexity query for {user['email']}")
             except Exception as e:
                 print(f"[job] Attempt {attempt}: query refinement error for {user['email']}: {e}")
 
-        # Fetch articles — try Perplexity first, fall back to Claude web search after 2 failures
-        perplexity_failures = attempt - 1  # rough proxy
+        # Fetch articles from Perplexity
         try:
-            if perplexity_failures >= 2:
-                print(f"[job] Attempt {attempt}: switching to Claude web search for {user['email']}")
-                raw_articles = claude_client.fetch_articles_via_claude(user, today, query_override=refined_query)
-            else:
-                raw_articles = perplexity_client.fetch_articles(user, today, query_override=refined_query)
+            raw_articles = perplexity_client.fetch_articles(user, today, query_override=refined_query)
             print(f"[job] Attempt {attempt}: fetched {len(raw_articles)} articles for {user['email']}")
         except Exception as e:
-            print(f"[job] Attempt {attempt}: fetch error for {user['email']}: {e}")
-            if attempt < 5:
+            print(f"[job] Attempt {attempt}: Perplexity error for {user['email']}: {e}")
+            if attempt < 3:
                 time.sleep(10)
             continue
 
-        # Personalise with Claude
+        # Personalise with Claude Sonnet
         try:
             briefing = claude_client.personalise_briefing(user, raw_articles, today)
             if not isinstance(briefing, dict) or 'items' not in briefing:
-                print(f"[job] Attempt {attempt}: unexpected briefing structure for {user['email']} — retrying")
+                print(f"[job] Attempt {attempt}: unexpected briefing structure — retrying")
                 briefing = None
                 continue
         except Exception as e:
             print(f"[job] Attempt {attempt}: Claude error for {user['email']}: {e}")
             briefing = None
+            if '429' in str(e) or '529' in str(e):
+                print(f"[job] Rate limit — waiting 60s")
+                time.sleep(60)
             continue
 
-        # Code-level filters
+        # Code-level filters only (no Claude call)
         code_flags = check_content_filters(briefing, user)
-
-        # AI validation
-        ai_flags = []
-        try:
-            validation = claude_client.validate_briefing(briefing, user)
-            if not validation.get('valid', True):
-                ai_flags = validation.get('flags', [])
-        except Exception as e:
-            print(f"[job] Attempt {attempt}: AI validation error for {user['email']}: {e}")
-
-        all_flags = code_flags + ai_flags
-
-        if not all_flags:
-            print(f"[job] Attempt {attempt}: briefing passed all checks for {user['email']}")
+        if not code_flags:
+            print(f"[job] Attempt {attempt}: briefing passed code checks for {user['email']}")
             break
 
-        print(f"[job] Attempt {attempt}: {len(all_flags)} flag(s) for {user['email']} — refining query and retrying")
-        if attempt < 5:
-            time.sleep(5)
+        print(f"[job] Attempt {attempt}: {len(code_flags)} code flag(s) for {user['email']} — retrying")
+        if attempt < 3:
+            time.sleep(30)
 
-    if not briefing or all_flags:
-        print(f"[job] Failed to produce clean briefing for {user['email']} after 5 attempts — aborting")
-        if briefing:
-            db.log_flagged_briefing(user['id'], local_date, all_flags, briefing)
+    if not briefing:
+        print(f"[job] Failed to generate briefing for {user['email']} — aborting")
         return
+
+    # ── AI validation — run once on best briefing, log flags but don't hold ─
+    try:
+        validation = claude_client.validate_briefing(briefing, user)
+        if not validation.get('valid', True):
+            ai_flags = validation.get('flags', [])
+            print(f"[job] AI validation flags for {user['email']}: {ai_flags} — logging but sending")
+            db.log_flagged_briefing(user['id'], local_date, ai_flags, briefing)
+    except Exception as e:
+        print(f"[job] AI validation error for {user['email']}: {e} — skipping")
 
     # ── Render and send ────────────────────────────────────────────────────
     try:
