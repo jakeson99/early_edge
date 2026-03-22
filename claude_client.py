@@ -174,11 +174,14 @@ ORIGINAL QUERY:
 QUALITY ISSUES TO FIX:
 {chr(10).join(f'- {f}' for f in flags)}
 
-Rewrite the query to fix these issues:
-- If sources lack diversity: explicitly request articles from at least 5 different named publications
-- If personalisation is weak: make the subscriber's goal more prominent so articles directly relate to it
-- If factual accuracy is a concern: request well-sourced, established publications only
-- If content is generic: add more specificity tied to the subscriber's goal and domains
+Rewrite the query to fix these issues. IMPORTANT rules:
+- Do NOT add URL verification requirements — this causes empty results
+- Do NOT demand verified or working URLs — the system handles that separately
+- Do NOT add more source restrictions that would reduce the number of results
+- If sources lack diversity: suggest broader topic angles to naturally find different publications
+- If personalisation is weak: make the subscriber's goal more specific and prominent
+- If content is generic: add concrete industry terms, named trends, or specific topics tied to the goal
+- Keep the query open enough that Perplexity can always find at least 3-5 results
 
 Return ONLY the improved query text, no explanation or preamble."""
 
@@ -188,6 +191,46 @@ Return ONLY the improved query text, no explanation or preamble."""
         messages=[{"role": "user", "content": prompt}],
     )
     return response.content[0].text.strip()
+
+
+def fetch_articles_via_claude(user: dict, today: date, query_override: str = None) -> list[dict]:
+    """Fallback article fetcher using Claude's web search tool."""
+    from perplexity_client import _build_query
+    query = query_override or _build_query(user, today)
+
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=2000,
+        tools=[{"type": "web_search_20250305", "name": "web_search"}],
+        messages=[{
+            "role": "user",
+            "content": (
+                f"{query}\n\n"
+                "Return ONLY a valid JSON array with no preamble or markdown fences. "
+                'Format: [{"headline": "", "summary": "", "source_name": "", "source_url": "", "published_date": ""}]'
+            )
+        }],
+    )
+
+    # Extract text from response (may include tool use blocks)
+    result_text = ''
+    for block in response.content:
+        if hasattr(block, 'text'):
+            result_text = block.text.strip()
+            break
+
+    clean = result_text
+    if clean.startswith('```'):
+        parts = clean.split('```')
+        clean = parts[1]
+        if clean.startswith('json'):
+            clean = clean[4:]
+        clean = clean.strip()
+
+    items = json.loads(clean)
+    if not isinstance(items, list) or len(items) < 3:
+        raise RuntimeError(f'Claude web search returned fewer than 3 items ({len(items) if isinstance(items, list) else 0})')
+    return items[:5]
 
 
 def validate_briefing(briefing: dict, user: dict) -> dict:

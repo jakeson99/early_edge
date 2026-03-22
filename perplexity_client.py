@@ -35,7 +35,7 @@ def _build_query(user: dict, today: date) -> str:
     parts += [
         "Cover a mix of: breaking news, market signals, long-form analysis, technology, and cultural/geopolitical context.",
         "For each item return: headline, a 2-sentence summary in your own words (never reproduce verbatim text), publication name, full URL, and publication date.",
-        "Only include articles with real, working URLs. If you are not confident a URL is accurate, omit that item.",
+        "Include your best available URL for each item — approximate or homepage URLs are acceptable if the exact article URL is unavailable.",
         "Return ONLY a valid JSON array with no preamble, explanation, or markdown fences.",
         'Format: [{"headline": "", "summary": "", "source_name": "", "source_url": "", "published_date": ""}]',
     ]
@@ -64,10 +64,11 @@ def fetch_articles(user: dict, today: date, query_override: str = None) -> list[
                 {
                     'role': 'system',
                     'content': (
-                        'You are a precise research assistant. '
-                        'Return only valid JSON arrays. '
-                        'Never fabricate URLs or publication names. '
-                        'If you cannot find 5 real articles, return fewer rather than inventing sources.'
+                        'You are a research assistant finding relevant news. '
+                        'Always return a valid JSON array — never return an empty array. '
+                        'Return your best effort: provide what you can find even if recency or URLs are approximate. '
+                        'It is better to include an article with an approximate URL than to omit it entirely. '
+                        'Aim for 5 items but return at least 3.'
                     ),
                 },
                 {

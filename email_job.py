@@ -121,12 +121,17 @@ def send_briefing(user: dict):
             except Exception as e:
                 print(f"[job] Attempt {attempt}: query refinement error for {user['email']}: {e}")
 
-        # Fetch from Perplexity (always re-fetch on retry with refined query)
+        # Fetch articles — try Perplexity first, fall back to Claude web search after 2 failures
+        perplexity_failures = attempt - 1  # rough proxy
         try:
-            raw_articles = perplexity_client.fetch_articles(user, today, query_override=refined_query)
-            print(f"[job] Attempt {attempt}: Perplexity returned {len(raw_articles)} articles for {user['email']}")
+            if perplexity_failures >= 2:
+                print(f"[job] Attempt {attempt}: switching to Claude web search for {user['email']}")
+                raw_articles = claude_client.fetch_articles_via_claude(user, today, query_override=refined_query)
+            else:
+                raw_articles = perplexity_client.fetch_articles(user, today, query_override=refined_query)
+            print(f"[job] Attempt {attempt}: fetched {len(raw_articles)} articles for {user['email']}")
         except Exception as e:
-            print(f"[job] Attempt {attempt}: Perplexity error for {user['email']}: {e}")
+            print(f"[job] Attempt {attempt}: fetch error for {user['email']}: {e}")
             if attempt < 5:
                 time.sleep(10)
             continue
