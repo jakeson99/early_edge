@@ -167,7 +167,6 @@ def admin_send_now():
     users = db.get_active_users()
     results = {'queued': 0, 'skipped': 0, 'emails': []}
 
-    import threading
     from datetime import date
     local_date = date.today().isoformat()
 
@@ -176,9 +175,9 @@ def admin_send_now():
             results['skipped'] += 1
             results['emails'].append({'email': user['email'], 'status': 'skipped (already sent today)'})
         else:
-            threading.Thread(target=email_job.send_briefing, args=(user,), daemon=True).start()
+            email_job.send_briefing(user)
             results['queued'] += 1
-            results['emails'].append({'email': user['email'], 'status': 'queued'})
+            results['emails'].append({'email': user['email'], 'status': 'sent'})
 
     print(f"[admin] Manual send triggered — {results['queued']} queued, {results['skipped']} skipped")
     return jsonify(results)
