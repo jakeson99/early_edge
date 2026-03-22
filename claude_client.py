@@ -147,7 +147,11 @@ Return a single JSON object:
         if result_text.startswith("json"):
             result_text = result_text[4:]
 
-    return json.loads(result_text.strip())
+    result = json.loads(result_text.strip())
+    # Normalise: if Claude returned a list directly instead of {"items": [...]}
+    if isinstance(result, list):
+        result = {'items': result}
+    return result
 
 
 def validate_briefing(briefing: dict, user: dict) -> dict:

@@ -112,11 +112,21 @@ def send_briefing(user: dict):
         print(f"[job] Perplexity error for {user['email']}: {e}")
         return
 
-    # ── Step 2: Personalise with Claude ────────────────────────────────────
-    try:
-        briefing = claude_client.personalise_briefing(user, raw_articles, today)
-    except Exception as e:
-        print(f"[job] Claude personalisation error for {user['email']}: {e}")
+    # ── Step 2: Personalise with Claude (up to 2 attempts) ────────────────────────────────────
+    briefing = None
+    for attempt in range(1, 3):
+        try:
+            briefing = claude_client.personalise_briefing(user, raw_articles, today)
+            if isinstance(briefing, dict) and 'items' in briefing:
+                break
+            print(f"[job] Attempt {attempt}: unexpected briefing structure for {user['email']} — retrying")
+            briefing = None
+        except Exception as e:
+            print(f"[job] Attempt {attempt}: Claude error for {user['email']}: {e}")
+            briefing = None
+
+    if not briefing:
+        print(f"[job] All attempts failed for {user['email']} — aborting")
         return
 
     # ── Code-level content filters ─────────────────────────────────────────
