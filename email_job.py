@@ -5,6 +5,7 @@ import db
 import perplexity_client
 import claude_client
 import email_client
+import auth
 
 _template_env = Environment(loader=FileSystemLoader('templates'))
 
@@ -17,8 +18,8 @@ def send_welcome_email(user: dict):
         template = _template_env.get_template('email_welcome.html')
         html = template.render(
             user=user,
-            profile_url=f"{BASE_URL}/profile?email={user['email']}",
-            unsubscribe_url=f"{BASE_URL}/unsubscribe?email={user['email']}",
+            profile_url=auth.signed_url(BASE_URL, user['email'], '/profile'),
+            unsubscribe_url=auth.signed_url(BASE_URL, user['email'], '/unsubscribe'),
             delete_url=f"{BASE_URL}/delete",
         )
     except Exception as e:
@@ -177,8 +178,8 @@ def send_briefing(user: dict):
             user=user,
             briefing=briefing,
             date_str=today.strftime('%A, %d %B %Y'),
-            unsubscribe_url=f"{BASE_URL}/unsubscribe?email={user['email']}",
-            profile_url=f"{BASE_URL}/profile?email={user['email']}",
+            unsubscribe_url=auth.signed_url(BASE_URL, user['email'], '/unsubscribe'),
+            profile_url=auth.signed_url(BASE_URL, user['email'], '/profile'),
         )
     except Exception as e:
         print(f"[job] Template error for {user['email']}: {e}")

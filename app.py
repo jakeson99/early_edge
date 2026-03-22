@@ -7,9 +7,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 import db
 import email_job
+import auth
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-change-in-prod')
+app.secret_key = os.environ['SECRET_KEY']
 
 DELIVERY_HOUR_MAP = {
     "5:00 AM": 5,
@@ -62,6 +63,9 @@ def index():
 @app.route('/profile')
 def profile():
     email = request.args.get('email', '')
+    token = request.args.get('token', '')
+    if email and not auth.verify(email, token):
+        return render_template('form.html', prefill_email='', user=None)
     user = db.get_user_by_email(email) if email else None
     return render_template('form.html', prefill_email=email, user=user)
 
@@ -130,8 +134,9 @@ def submit():
 @app.route('/unsubscribe')
 def unsubscribe():
     email = request.args.get('email', '').strip().lower()
+    token = request.args.get('token', '')
     unsubscribed = False
-    if email:
+    if email and auth.verify(email, token):
         user = db.get_user_by_email(email)
         if user and user.get('active'):
             db.deactivate_user(user['id'])
@@ -161,7 +166,7 @@ def health():
 @app.route('/admin/send-now', methods=['POST'])
 def admin_send_now():
     """Manually trigger briefing emails to all active subscribers."""
-    token = request.headers.get('X-Admin-Token') or request.args.get('token')
+    token = request.headers.get('X-Admin-Token')
     secret = os.environ.get('SECRET_KEY', '')
     if not token or token != secret:
         return jsonify({'error': 'Unauthorized'}), 401
