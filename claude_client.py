@@ -40,7 +40,7 @@ PROMPT_ARCHETYPES = {
 }
 
 
-def personalise_briefing(user: dict, raw_articles: list[dict], today: date) -> dict:
+def personalise_briefing(user: dict, raw_articles: list[dict], today: date, fix_flags: list = None) -> dict:
     """
     Takes raw articles from Perplexity and adds personalisation via Claude.
     Returns a structured briefing dict with items and optional prompts.
@@ -92,6 +92,14 @@ def personalise_briefing(user: dict, raw_articles: list[dict], today: date) -> d
 
     articles_json = json.dumps(raw_articles, indent=2)
 
+    fix_instruction = ''
+    if fix_flags:
+        fix_instruction = (
+            '\n\nPREVIOUS ATTEMPT FAILED QUALITY CHECKS. You MUST fix ALL of the following:\n'
+            + '\n'.join(f'- {f}' for f in fix_flags)
+            + '\nDo not repeat these mistakes.'
+        )
+
     user_message = f"""Today is {today.strftime('%A, %d %B %Y')}.
 
 Here are the 5 articles found for {name}:
@@ -131,7 +139,7 @@ Return a single JSON object:
     "synthesis": "...",
     "prediction": "..."
   }}
-}}"""
+}}{fix_instruction}"""
 
     response = client.messages.create(
         model="claude-sonnet-4-6",

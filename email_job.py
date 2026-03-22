@@ -104,46 +104,56 @@ def send_briefing(user: dict):
 
     print(f"[job] Generating briefing for {user['name']} ({user['email']})…")
 
-    # ── Step 1: Fetch live articles from Perplexity (up to 2 attempts) ────────────────────────
+    # ── Steps 1+2: Fetch + Personalise with up to 5 quality-check retries ───
     import time
-    raw_articles = None
-    for attempt in range(1, 3):
-        try:
-            raw_articles = perplexity_client.fetch_articles(user, today)
-            print(f"[job] Perplexity returned {len(raw_articles)} articles for {user['email']}")
-            break
-        except Exception as e:
-            print(f"[job] Attempt {attempt}: Perplexity error for {user['email']}: {e}")
-            if attempt < 2:
-                time.sleep(10)
-
-    if not raw_articles:
-        print(f"[job] Perplexity failed after 2 attempts for {user['email']} — aborting")
-        return
-
-    # ── Step 2: Personalise with Claude (up to 2 attempts) ────────────────────────────────────
     briefing = None
-    for attempt in range(1, 3):
+    code_flags = []
+    raw_articles = None
+
+    for attempt in range(1, 6):
+        # Re-fetch from Perplexity if we have no articles or source diversity failed
+        need_new_articles = raw_articles is None or any(
+            'source' in f.lower() for f in code_flags
+        )
+        if need_new_articles:
+            try:
+                raw_articles = perplexity_client.fetch_articles(user, today)
+                print(f"[job] Attempt {attempt}: Perplexity returned {len(raw_articles)} articles for {user['email']}")
+            except Exception as e:
+                print(f"[job] Attempt {attempt}: Perplexity error for {user['email']}: {e}")
+                if attempt < 5:
+                    time.sleep(10)
+                continue
+
+        # Personalise with Claude, passing flags from previous attempt if any
         try:
-            briefing = claude_client.personalise_briefing(user, raw_articles, today)
-            if isinstance(briefing, dict) and 'items' in briefing:
-                break
-            print(f"[job] Attempt {attempt}: unexpected briefing structure for {user['email']} — retrying")
-            briefing = None
+            briefing = claude_client.personalise_briefing(
+                user, raw_articles, today,
+                fix_flags=code_flags if code_flags else None
+            )
+            if not isinstance(briefing, dict) or 'items' not in briefing:
+                print(f"[job] Attempt {attempt}: unexpected briefing structure for {user['email']} — retrying")
+                briefing = None
+                continue
         except Exception as e:
             print(f"[job] Attempt {attempt}: Claude error for {user['email']}: {e}")
             briefing = None
+            continue
 
-    if not briefing:
-        print(f"[job] All attempts failed for {user['email']} — aborting")
-        return
+        # Check quality filters
+        code_flags = check_content_filters(briefing, user)
+        if not code_flags:
+            print(f"[job] Attempt {attempt}: briefing passed all checks for {user['email']}")
+            break
 
-    # ── Code-level content filters ─────────────────────────────────────────
-    code_flags = check_content_filters(briefing, user)
-    if code_flags:
-        print(f"[job] Code filter flagged briefing for {user['email']}: {code_flags}")
-        db.log_flagged_briefing(user['id'], local_date, code_flags, briefing)
-        print(f"[job] Briefing held — not sent to {user['email']}")
+        print(f"[job] Attempt {attempt}: flags for {user['email']}: {code_flags} — retrying with fixes")
+        if attempt < 5:
+            time.sleep(5)
+
+    if not briefing or code_flags:
+        print(f"[job] Failed to produce clean briefing for {user['email']} after 5 attempts — aborting")
+        if briefing:
+            db.log_flagged_briefing(user['id'], local_date, code_flags, briefing)
         return
 
     # ── Render and send ────────────────────────────────────────────────────
