@@ -17,7 +17,7 @@ def send_welcome_email(user: dict):
         template = _template_env.get_template('email_welcome.html')
         html = template.render(
             user=user,
-            profile_url=f"{BASE_URL}/profile",
+            profile_url=f"{BASE_URL}/profile?email={user['email']}",
             unsubscribe_url=f"{BASE_URL}/unsubscribe?email={user['email']}",
             delete_url=f"{BASE_URL}/delete",
         )
@@ -145,6 +145,7 @@ def send_briefing(user: dict):
             briefing=briefing,
             date_str=today.strftime('%A, %d %B %Y'),
             unsubscribe_url=f"{BASE_URL}/unsubscribe?email={user['email']}",
+            profile_url=f"{BASE_URL}/profile?email={user['email']}",
         )
     except Exception as e:
         print(f"[job] Template error for {user['email']}: {e}")
